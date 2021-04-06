@@ -1,0 +1,155 @@
+{
+    "CompileProcesses": [
+        "cgproc.26696.json"
+    ],
+    "MlibObjs": {},
+    "CompileStrategy": "fullobj",
+    "PrevCompiledModules": {
+        "std": {
+            "reYIK_d": {
+                "archive": "archive.31/_prev_archive_1.a",
+                "bytes": 28470,
+                "mod": "std",
+                "mode": 4,
+                "checksum": 4294967295,
+                "out": "reYIK_d.o"
+            }
+        },
+        "ShiftRegister": {
+            "WB1J1_d": {
+                "archive": "archive.31/_prev_archive_1.a",
+                "bytes": 8216,
+                "mod": "ShiftRegister",
+                "mode": 4,
+                "checksum": 4294967295,
+                "out": "WB1J1_d.o"
+            }
+        },
+        "Counter_Down": {
+            "xnIc7_d": {
+                "archive": "archive.31/_prev_archive_1.a",
+                "bytes": 7805,
+                "mod": "Counter_Down",
+                "mode": 4,
+                "checksum": 4294967295,
+                "out": "xnIc7_d.o"
+            }
+        },
+        "...MASTER...": {
+            "amcQw_d": {
+                "bytes": 8824,
+                "mod": "...MASTER...",
+                "out": "objs/amcQw_d.o",
+                "mode": 4,
+                "checksum": 4294967295
+            }
+        },
+        "test": {
+            "x9Hvb_d": {
+                "archive": "archive.31/_26696_archive_1.a",
+                "bytes": 30787,
+                "mod": "test",
+                "out": "x9Hvb_d.o",
+                "mode": 4,
+                "checksum": 4294967295
+            }
+        }
+    },
+    "stat": {
+        "ru_self_cgstart": {
+            "ru_nvcsw": 115,
+            "ru_utime_sec": 0.052463000000000003,
+            "ru_nivcsw": 2,
+            "ru_majflt": 0,
+            "ru_stime_sec": 0.031275999999999998,
+            "ru_maxrss_kb": 48060,
+            "ru_minflt": 13227
+        },
+        "ru_childs_cgstart": {
+            "ru_nvcsw": 0,
+            "ru_utime_sec": 0.0,
+            "ru_nivcsw": 0,
+            "ru_majflt": 0,
+            "ru_stime_sec": 0.0,
+            "ru_maxrss_kb": 0,
+            "ru_minflt": 0
+        },
+        "mopSpeed": 155601.33100934874,
+        "nMops": 1964,
+        "nQuads": 841,
+        "ru_childs_end": {
+            "ru_nvcsw": 0,
+            "ru_utime_sec": 0.0,
+            "ru_nivcsw": 0,
+            "ru_majflt": 0,
+            "ru_stime_sec": 0.0,
+            "ru_maxrss_kb": 0,
+            "ru_minflt": 0
+        },
+        "totalObjSize": 100045,
+        "ru_self_end": {
+            "ru_nvcsw": 184,
+            "ru_utime_sec": 0.065085000000000004,
+            "ru_nivcsw": 4,
+            "ru_majflt": 0,
+            "ru_stime_sec": 0.049064000000000003,
+            "ru_maxrss_kb": 55484,
+            "ru_minflt": 15449
+        },
+        "CodeGen(%)": 19.393101329031268,
+        "quadSpeed": 66629.694184756765,
+        "mop/quad": 2.3353151010701545,
+        "Frontend(%)": 80.606898670968732,
+        "outputSizePerQuad": 118.0
+    },
+    "CurCompileModules": [
+        "...MASTER...",
+        "test"
+    ],
+    "CompileStatus": "Successful",
+    "PEModules": [],
+    "CurCompileUdps": {},
+    "NameTable": {
+        "ShiftRegister": [
+            "ShiftRegister",
+            "WB1J1",
+            "module"
+        ],
+        "std": [
+            "std",
+            "reYIK",
+            "module"
+        ],
+        "Counter_Down": [
+            "Counter_Down",
+            "xnIc7",
+            "module"
+        ],
+        "test": [
+            "test",
+            "x9Hvb",
+            "module"
+        ],
+        "...MASTER...": [
+            "SIM",
+            "amcQw",
+            "module"
+        ]
+    },
+    "SIMBData": {
+        "out": "amcQwB.o",
+        "bytes": 60266
+    },
+    "LVLData": [
+        "SIM"
+    ],
+    "Misc": {
+        "default_output_dir": "csrc",
+        "cwd": "/afs/ece.cmu.edu/usr/albertc1/Private/18847/18847_joebertli",
+        "csrc": "csrc",
+        "daidir_abs": "/afs/ece.cmu.edu/usr/albertc1/Private/18847/18847_joebertli/simv.daidir",
+        "csrc_abs": "/afs/ece.cmu.edu/usr/albertc1/Private/18847/18847_joebertli/csrc",
+        "daidir": "simv.daidir",
+        "archive_dir": "archive.31"
+    }
+}
