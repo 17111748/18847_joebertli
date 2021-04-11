@@ -28,118 +28,23 @@ module Counter_Down
 
 endmodule: Counter_Down
 
-module ShiftRegister 
-  #(parameter WIDTH = 4) 
-  (input  logic en, left, clk, load, 
-   input  logic D, 
-   output logic [WIDTH-1:0] Q); 
-
-  always_ff @(posedge clk) 
-   if(load) 
-    Q <= 0; 
-   else if(en & left) 
-    Q <= ((Q << 1) + D); 
-   else if(en & ~left)
-    Q <= Q >> 1; 
-
-endmodule: ShiftRegister
-
-// // Performs out = a*b + c 
-// module unary_binary_MAC_3
-//     #(parameter SIZE = 3)
-//     (input  logic clk, 
-//      input  logic reset_n, 
-//      input  logic valid, // Start of when the input signal should be grabbed 
-//      input  logic [SIZE-1:0] a, 
-//      input  logic [SIZE-1:0] b, 
-//      input  logic [SIZE-1:0] c, 
-//      output logic ready, 
-//      output logic [(SIZE<<1)-1:0] out); 
-
-//     logic [(1<<SIZE)-1:0] unary; // Includes the c at the MSB
-//     logic [(1<<SIZE)-1:0] unary_out; // Includes the c at the MSB
-
-//     logic temp_ready; 
-
-//     logic [SIZE-1:0] a_reg; 
-//     logic [SIZE-1:0] b_reg; 
-//     logic [SIZE-1:0] c_reg; 
-
-//     logic [SIZE:0] counter_out; 
-
-//     // Stores the original binary input into a register 
-//     always_ff@(posedge clk) 
-//         if(valid) begin 
-//             a_reg <= a; 
-//             b_reg <= b; 
-//             c_reg <= c; 
-//         end 
-
-//     // Turn binary input into unary input 
-//     Counter #(SIZE+1) counter(.en(1'b1), .clear(valid), .clk(clk), .Q(counter_out)); 
-//     always_ff@(posedge clk, negedge reset_n) 
-//         if(~reset_n) begin 
-//             unary[(1<<SIZE)-1:0] <= 8'b0; 
-//             ready <= 1'b0; 
-//             temp_ready <= 1'b0; 
-//         end 
-//         else begin 
-//             ready <= 1'b0; 
-//             if(valid) 
-//                 temp_ready <= 1'b0; 
-//             if(counter_out < a_reg) 
-//                 unary[(1<<SIZE)-2:0] <= 7'h7F; // Change this to arbitrary size 
-//             else 
-//                 unary[(1<<SIZE)-2:0] <= 7'b0; 
-//             if(counter_out < c_reg) 
-//                 unary[(1<<SIZE)-1] <= 1'b1; 
-//             else 
-//                 unary[(1<<SIZE)-1] <= 1'b0; 
-//             if(counter_out >= a_reg && counter_out >= c_reg && temp_ready == 1'b0) begin 
-//                 ready <= 1'b1; 
-//                 temp_ready <= 1'b1; 
-//             end 
-//         end 
-
-//     // Mask the Fanned Out unary inputs with the bits of a binary number 
-//     genvar i; 
-//     generate 
-//         for(i = 1; i < (1<<SIZE); i = i + 1)
-//         begin : loop 
-//             assign unary_out[i-1] = unary[i-1] & b_reg[$clog2(i+1)-1]; // Masking it with the second input
-//         end: loop 
-//     endgenerate    
-
-//     // Accumulator 
-//     assign unary_out[(1<<SIZE)-1] = unary[(1<<SIZE)-1]; // Propogate the c value 
-    
-//     always_ff@(posedge clk, negedge reset_n) 
-//         if(~reset_n)
-//             out <= 0; 
-//         else if(ready == 1'b1)
-//             out <= 0; 
-//         else
-//             out <= out + $countones(unary_out); 
-
-
-// endmodule: unary_binary_MAC_3
 
 // Performs out = a*b + c 
-module unary_binary_MAC_4
+module unary_binary_MAC
     #(parameter SIZE = 4)
     (input  logic clk, 
      input  logic reset_n, 
-     input  logic valid, // Start of when the input signal should be grabbed 
+     input  logic valid, // Start of when the input signal should be grabbed.
      input  logic [SIZE-1:0] a, 
      input  logic [SIZE-1:0] b, 
      input  logic [SIZE-1:0] c, 
-     output logic ready, 
+     output logic ready, // Asserted when the output is ready to be read. 
      output logic [(SIZE<<1)-1:0] out); 
 
     logic [(1<<SIZE)-1:0] unary; // Includes the c at the MSB
     logic [(1<<SIZE)-1:0] unary_out; // Includes the c at the MSB
 
-    logic temp_ready; 
+    logic ready_flag; // Flag to reset the ready signal 
 
     logic [SIZE-1:0] a_reg; 
     logic [SIZE-1:0] b_reg; 
@@ -159,25 +64,25 @@ module unary_binary_MAC_4
     Counter #(SIZE+1) counter(.en(1'b1), .clear(valid), .clk(clk), .Q(counter_out)); 
     always_ff@(posedge clk, negedge reset_n) 
         if(~reset_n) begin 
-            unary[(1<<SIZE)-1:0] <= 16'b0; 
-            ready <= 1'b0; 
-            temp_ready <= 1'b0; 
+            unary[(1<<SIZE)-1:0]     <= (SIZE<<1)'('b0); 
+            ready                    <= 1'b0; 
+            ready_flag               <= 1'b0; 
         end 
         else begin 
-            ready <= 1'b0; 
+            ready                    <= 1'b0; 
             if(valid) 
-                temp_ready <= 1'b0; 
+                temp_ready           <= 1'b0; 
             if(counter_out < a_reg) 
-                unary[(1<<SIZE)-2:0] <= 15'h7FFF; // Change this to arbitrary size 
+                unary[(1<<SIZE)-2:0] <= ~(((SIZE<<1)-1)'('b0)); // Change this to arbitrary size 
             else 
-                unary[(1<<SIZE)-2:0] <= 15'b0; 
+                unary[(1<<SIZE)-2:0] <= ((SIZE<<1)-1)'('b0); 
             if(counter_out < c_reg) 
-                unary[(1<<SIZE)-1] <= 1'b1; 
+                unary[(1<<SIZE)-1]   <= 1'b1; 
             else 
-                unary[(1<<SIZE)-1] <= 1'b0; 
-            if(counter_out >= a_reg && counter_out >= c_reg && temp_ready == 1'b0) begin 
-                ready <= 1'b1; 
-                temp_ready <= 1'b1; 
+                unary[(1<<SIZE)-1]   <= 1'b0; 
+            if(counter_out >= a_reg && counter_out >= c_reg && ready_flag == 1'b0) begin 
+                ready                <= 1'b1; 
+                ready_flag           <= 1'b1; 
             end 
         end 
 
@@ -202,121 +107,51 @@ module unary_binary_MAC_4
             out <= out + $countones(unary_out); 
 
 
-endmodule: unary_binary_MAC_4
+endmodule: unary_binary_MAC
 
 
 
+// //###############################################################################################
+// // ANOTHER METHOD: It might be slightly faster 
 
+// // Stores the original binary input into a register 
+// always_ff@(posedge clk) 
+//     if(valid)
+//         b_reg <= b; 
 
+// logic zero_a, zero_c;  
 
-   
-// // Performs out = a*b + c 
-// module unary_binary_MAC
-//     #(parameter SIZE = 4)
-//     (input  logic clk, 
-//      input  logic reset_n, 
-//      input  logic valid, // Start of when the input signal should be grabbed 
-//      input  logic [SIZE-1:0] a, 
-//      input  logic [SIZE-1:0] b, 
-//      input  logic [SIZE-1:0] c, 
-//      output logic ready, 
-//      output logic [(SIZE<<1)-1:0] out); 
+// logic [SIZE:0] counter_out_a; 
+// logic [SIZE:0] counter_out_c; 
 
-//     logic unary [(1<<SIZE)-1:0]; // Includes the c at the MSB
-//     logic unary_out [(1<<SIZE)-1:0]; // Includes the c at the MSB
-
-//     logic [SIZE-1:0] a_reg; 
-//     logic [SIZE-1:0] b_reg; 
-//     logic [SIZE-1:0] c_reg; 
-
-//     logic [SIZE:0] counter_out; 
-
-//     // Stores the original binary input into a register 
-//     always_ff@(posedge clk) 
-//         if(valid) begin 
-//             a_reg <= a; 
-//             b_reg <= b; 
-//             c_reg <= c; 
+// // Turn binary input into unary input 
+// Counter_Down #(WIDTH=SIZE) counter(.en(zero_a), .load(valid), .clk(clk), .D(a), .Q(counter_out_a)); 
+// Counter_Down #(WIDTH=SIZE) counter(.en(zero_c), .load(valid), .clk(clk), .D(c), .Q(counter_out_a)); 
+// always_ff@(posedge clk, negedge reset_n) 
+//     if(~reset_n) begin 
+//         unary[(1<<SIZE)-1:0] <= 0; 
+//         zero_a <= 1'b1; 
+//         zero_c <= 1'b1; 
+//     end 
+//     else begin 
+//         if(valid) begin
+//             zero_a <= 1'b1; 
+//             zero_c <= 1'b1; 
 //         end 
-    
-//     // Turn binary input into unary input 
-//     Counter #(WIDTH=SIZE) counter(.en(1'b1), .clear(valid), .clk(clk), .Q(counter_out)); 
-//     always_ff@(posedge clk, negedge reset_n) 
-//         if(~reset_n)
-//             unary[(1<<SIZE)-1:0] <= 0; 
+//         if((counter_out_a >= 0) && (counter_out_a[SIZE] != 1'b1)) begin 
+//             unary[(1<<SIZE)-2:0] <= 15'h7FFF; // Change this to arbitrary size 
+//         end 
+//         else begin
+//             unary[(1<<SIZE)-2:0] <= 15'b0; 
+//             zero_a <= 1'b0;
+//         end 
+//         if((counter_out_c >= 0) && (counter_out_c[SIZE] != 1'b1)) begin 
+//             unary[(1<<SIZE)-1] <= 1'b1; 
+//         end 
 //         else begin 
-//             if(counter_out <= a_reg) 
-//                 unary[(1<<SIZE)-2:0] <= 15'h7FFF; // Change this to arbitrary size 
-//             else 
-//                 unary[(1<<SIZE)-2:0] <= 15'b0; 
-//             if(counter_out <= c_reg) 
-//                 unary[(1<<SIZE)-1] <= 1'b1; 
-//             else 
-//                 unary[(1<<SIZE)-1] <= 1'b0; 
+//             unary[(1<<SIZE)-1] <= 1'b0; 
+//             zero_c <= 1'b0;
 //         end 
-
-//     // //###############################################################################################
-//     // // ANOTHER METHOD: 
-
-//     // // Stores the original binary input into a register 
-//     // always_ff@(posedge clk) 
-//     //     if(valid)
-//     //         b_reg <= b; 
-    
-//     // logic zero_a, zero_c;  
-
-//     // logic [SIZE:0] counter_out_a; 
-//     // logic [SIZE:0] counter_out_c; 
-
-//     // // Turn binary input into unary input 
-//     // Counter_Down #(WIDTH=SIZE) counter(.en(zero_a), .load(valid), .clk(clk), .D(a), .Q(counter_out_a)); 
-//     // Counter_Down #(WIDTH=SIZE) counter(.en(zero_c), .load(valid), .clk(clk), .D(c), .Q(counter_out_a)); 
-//     // always_ff@(posedge clk, negedge reset_n) 
-//     //     if(~reset_n) begin 
-//     //         unary[(1<<SIZE)-1:0] <= 0; 
-//     //         zero_a <= 1'b1; 
-//     //         zero_c <= 1'b1; 
-//     //     end 
-//     //     else begin 
-//     //         if(valid) begin
-//     //             zero_a <= 1'b1; 
-//     //             zero_c <= 1'b1; 
-//     //         end 
-//     //         if((counter_out_a >= 0) && (counter_out_a[SIZE] != 1'b1)) begin 
-//     //             unary[(1<<SIZE)-2:0] <= 15'h7FFF; // Change this to arbitrary size 
-//     //         end 
-//     //         else begin
-//     //             unary[(1<<SIZE)-2:0] <= 15'b0; 
-//     //             zero_a <= 1'b0;
-//     //         end 
-//     //         if((counter_out_c >= 0) && (counter_out_c[SIZE] != 1'b1)) begin 
-//     //             unary[(1<<SIZE)-1] <= 1'b1; 
-//     //         end 
-//     //         else begin 
-//     //             unary[(1<<SIZE)-1] <= 1'b0; 
-//     //             zero_c <= 1'b0;
-//     //         end 
-//     //     end 
-//     // //###############################################################################################
-
-//     // Mask the Fanned Out unary inputs with the bits of a binary number 
-//     genvar i; 
-//     generate 
-//         for(i = 1; i < (1<<SIZE); i = i + 1)
-//         begin : loop 
-//             assign unary_out[i-1] = unary[i-1] & b_reg[$clog2(i+1)-1]; // Masking it with the second input
-//         end: loop 
-//     endgenerate    
-
-//     // Accumulator 
-//     assign unary_out[(1<<SIZE)-1] = unary_out[(1<<SIZE)-1]; // Propogate the c value 
-    
-//     always_ff@(posedge clk, negedge reset_n) 
-//         if(~reset_n)
-//             out <= 0; 
-//         else 
-//             out <= out + $countones(unary_out); 
-
-
-// endmodule: unary_binary_MAC
+//     end 
+// //###############################################################################################
 
