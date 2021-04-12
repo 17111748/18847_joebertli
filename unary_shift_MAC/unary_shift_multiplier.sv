@@ -49,7 +49,7 @@ module unary_shift_multiplier #(
     siso_shift #(U_BITS) shift_in_b (
         .clk      (clk),
         .reset_n  (reset_n),
-        .in       (in_b && load_b),
+        .in       (in_b & load_b),
         .shift    (shift_b),
         .out      (empty_n)
     );
@@ -75,58 +75,48 @@ module unary_shift_multiplier #(
         .out      ({last_n, out})
     );
 
-    localparam NUM_STATES = 3;
+    localparam NUM_STATES = 2;
     enum logic [$clog2(NUM_STATES) - 1:0] {
-        INIT,
         READ,
         OUTPUT
     } state_c, state_q;
 
-    assign shift_a = in_valid;
-    assign shift_b = in_valid || (!last_n && empty_n);
-    assign load_b  = in_valid;
+    assign shift_a   = in_valid;
+    assign shift_b   = in_valid | (~last_n & empty_n);
+    assign load_b    = in_valid;
+    assign shift_out = ~load_out;
 
     always_comb begin
         state_c = state_q;
 
         load_out  = 'b0;
-        shift_out = 'b0;
         clear_out = 'b0;
 
         case(state_q)
-            INIT: begin
-                if(in_valid) begin
-                    state_c = READ;
-                end
-
-                clear_out = 1'b1;
-            end
-
             READ: begin
-                if(!in_valid) begin
-                    /* Edge case for multiplying by 0 */
-                    state_c   = (~empty_n) ? INIT : OUTPUT;
-                    clear_out = ~empty_n;
+                if(!in_valid && empty_n) begin
+                    state_c = OUTPUT;
                 end
 
-                load_out = !in_valid;
+                /* OR ~empty_n is to handle multiplying by 0 */
+                clear_out = in_valid | ~empty_n;
+                load_out  = !in_valid;
             end
 
             OUTPUT: begin
                 if(!last_n && !empty_n) begin
-                    state_c   = INIT;
-                    clear_out = 1'b1;
+                    state_c = READ;
                 end
 
-                load_out      = !last_n && empty_n;
-                shift_out     = !load_out;
+                clear_out = !last_n && !empty_n;
+                load_out  = !last_n && empty_n;
             end
         endcase
     end
 
     always_ff @(posedge clk, negedge reset_n) begin
         if(!reset_n) begin
-            state_q <= INIT;
+            state_q <= READ;
         end
 
         else begin
