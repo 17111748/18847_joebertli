@@ -1,14 +1,15 @@
 `default_nettype none 
 
 module test(); 
+    localparam SIZE = 3;
     logic clk, reset_n, valid, ready; 
-    logic [3:0] a; 
-    logic [3:0] b; 
-    logic [3:0] c; 
-    logic [7:0] out; 
+    logic [SIZE-1:0] a; 
+    logic [SIZE-1:0] b; 
+    logic [SIZE-1:0] c; 
+    logic [(SIZE<<1)-1:0] out; 
 
   
-    unary_binary_MAC #(4) dut(.clk(clk), .reset_n(reset_n), .valid(valid), .a(a), .b(b), .c(c), .ready(ready), .out(out));
+    unary_binary_MAC #(SIZE) dut(.clk(clk), .reset_n(reset_n), .valid(valid), .a(a), .b(b), .c(c), .ready(ready), .out(out));
 
  
     initial begin
@@ -25,32 +26,14 @@ module test();
  
     initial begin 
  
-        a <= 4'd15; 
-        b <= 4'd15; 
-        c <= 4'd15; 
+        a <= SIZE'('d7); 
+        b <= SIZE'('d7); 
+        c <= SIZE'('d7); 
         valid <= 1'b1; 
         @(posedge clk); 
         valid <= 1'b0; 
-        @(posedge clk); 
-        @(posedge clk);
-        @(posedge clk); 
-        @(posedge clk); 
-        @(posedge clk);
-        @(posedge clk); 
-        @(posedge clk); 
-        @(posedge clk);
-        @(posedge clk); 
-        @(posedge clk); 
-        @(posedge clk);
-        @(posedge clk); 
-        @(posedge clk); 
-        @(posedge clk);
-        @(posedge clk); 
-        @(posedge clk); 
-        @(posedge clk);
-        @(posedge clk); 
-        @(posedge clk); 
-        @(posedge clk);
+        while (ready != 1'b1)
+            @(posedge clk); 
 
         $finish; 
     end 
