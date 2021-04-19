@@ -1,0 +1,17 @@
+{
+    "std": [
+        "std",
+        "reYIK",
+        "module"
+    ],
+    "prod_block_tb": [
+        "prod_block_tb",
+        "hkDta",
+        "module"
+    ],
+    "...MASTER...": [
+        "SIM",
+        "amcQw",
+        "module"
+    ]
+}

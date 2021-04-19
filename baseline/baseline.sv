@@ -5,23 +5,26 @@
 //  every iteration of the w Down_Counter)
 // When recycle goes high, Down_Counter resets to Q0
 module Down_Counter
-    #(parameter WIDTH = 4) 
-    (input  logic en, load, recycle, clk, 
-     input  logic [WIDTH-1:0] D, 
+    #(parameter WIDTH = 4)
+    (input  logic en, load, recycle, clk,
+     input  logic [WIDTH-1:0] D,
      output logic [WIDTH-1:0] Q0, Q);
 
-   always_ff @(posedge clk) 
-    if (load)
+   always_ff @(posedge clk)
+    if (load) begin
       Q  <= D;
       Q0 <= D;
-    else if (recycle)
+    end
+    else if (recycle) begin
       Q  <= Q0;
       Q0 <= Q0;
-    else if (en)
+    end
+    else if (en) begin
       Q  <= Q - 1;
       Q0 <= Q0;
+    end
 
-endmodule: Counter_Down
+endmodule: Down_Counter
 
 // Computes product of binary inputs w and x, and outputs in unary
 module Product_Block
@@ -47,7 +50,7 @@ module Product_Block
     assign top_done = (top_count == 4'd1);
     assign bot_done = (bot_count == 4'd0);
 
-    always_ff @(posedge clock, negedge reset_n)
+    always_ff @(posedge clk, negedge reset_n)
     if (~reset_n) curr_state <= INIT;
     else          curr_state <= next_state;
 
@@ -58,8 +61,8 @@ module Product_Block
         bot_en      = 1'b0;
         bot_ld      = 1'b0;
         bot_recycle = 1'b0;
-        out_rdy     = 1'b0;
-        case (currState)
+        out         = 1'b0;
+        case (curr_state)
             INIT: begin
                 // Once inputs have arrived, we can load them into counters
                 if (in_rdy) begin
@@ -72,6 +75,7 @@ module Product_Block
                 // If bottom counter isn't done, keep it going
                 if (~bot_done) begin
                     bot_en = 1'b1;
+                    out    = 1'b1;
                     next_state = COMP;
                 end
                 else if (bot_done) begin
@@ -87,7 +91,7 @@ module Product_Block
                     end
                 end
             end
-            
+
         endcase
     end
 

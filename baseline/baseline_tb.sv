@@ -19,7 +19,8 @@ module prod_block_tb();
     endtask
 
     initial begin
-        $monitor("clk: %d | w: %d | x: %d", clk, w, x);
+        $monitor($time,, " | w: %d | x: %d", clk, w, x);
+        reset();
            w = 4'd2;
            x = 4'd1;
         #1 w = 4'd3;

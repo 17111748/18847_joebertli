@@ -1,0 +1,125 @@
+{
+    "MlibObjs": {},
+    "CurCompileModules": [
+        "...MASTER...",
+        "prod_block_tb"
+    ],
+    "PrevCompiledModules": {
+        "prod_block_tb": {
+            "hkDta_d": {
+                "bytes": 15960,
+                "archive": "archive.1/_28924_archive_1.a",
+                "mode": 4,
+                "mod": "prod_block_tb",
+                "checksum": 4294967295,
+                "out": "hkDta_d.o"
+            }
+        },
+        "std": {
+            "reYIK_d": {
+                "bytes": 28470,
+                "archive": "archive.1/_prev_archive_1.a",
+                "mode": 4,
+                "mod": "std",
+                "checksum": 4294967295,
+                "out": "reYIK_d.o"
+            }
+        },
+        "...MASTER...": {
+            "amcQw_d": {
+                "bytes": 7287,
+                "mode": 4,
+                "mod": "...MASTER...",
+                "checksum": 4294967295,
+                "out": "objs/amcQw_d.o"
+            }
+        }
+    },
+    "SIMBData": {
+        "out": "amcQwB.o",
+        "bytes": 57377
+    },
+    "NameTable": {
+        "std": [
+            "std",
+            "reYIK",
+            "module"
+        ],
+        "prod_block_tb": [
+            "prod_block_tb",
+            "hkDta",
+            "module"
+        ],
+        "...MASTER...": [
+            "SIM",
+            "amcQw",
+            "module"
+        ]
+    },
+    "CurCompileUdps": {},
+    "PEModules": [],
+    "CompileStrategy": "fullobj",
+    "CompileStatus": "Successful",
+    "stat": {
+        "ru_self_cgstart": {
+            "ru_nivcsw": 4,
+            "ru_utime_sec": 0.070000000000000007,
+            "ru_stime_sec": 0.024029999999999999,
+            "ru_majflt": 3,
+            "ru_maxrss_kb": 47120,
+            "ru_nvcsw": 111,
+            "ru_minflt": 12446
+        },
+        "mopSpeed": 64859.210182198614,
+        "totalObjSize": 80624,
+        "mop/quad": 1.9527559055118111,
+        "ru_childs_cgstart": {
+            "ru_nivcsw": 0,
+            "ru_utime_sec": 0.0,
+            "ru_stime_sec": 0.0,
+            "ru_majflt": 0,
+            "ru_maxrss_kb": 0,
+            "ru_nvcsw": 0,
+            "ru_minflt": 0
+        },
+        "nQuads": 381,
+        "nMops": 744,
+        "ru_self_end": {
+            "ru_nivcsw": 5,
+            "ru_utime_sec": 0.081471000000000002,
+            "ru_stime_sec": 0.040218999999999998,
+            "ru_majflt": 3,
+            "ru_maxrss_kb": 54212,
+            "ru_nvcsw": 174,
+            "ru_minflt": 14570
+        },
+        "outputSizePerQuad": 211.0,
+        "ru_childs_end": {
+            "ru_nivcsw": 0,
+            "ru_utime_sec": 0.0,
+            "ru_stime_sec": 0.0,
+            "ru_majflt": 0,
+            "ru_maxrss_kb": 0,
+            "ru_nvcsw": 0,
+            "ru_minflt": 0
+        },
+        "quadSpeed": 33214.192311045255,
+        "Frontend(%)": 85.920143363896358,
+        "CodeGen(%)": 14.079856636103639
+    },
+    "LVLData": [
+        "SIM"
+    ],
+    "CompileProcesses": [
+        "cgproc.28924.json"
+    ],
+    "Misc": {
+        "daidir_abs": "/afs/andrew.cmu.edu/usr15/ayli1/private/18847/18847_joebertli/baseline/simv.daidir",
+        "daidir": "simv.daidir",
+        "cwd": "/afs/andrew.cmu.edu/usr15/ayli1/private/18847/18847_joebertli/baseline",
+        "csrc": "csrc",
+        "default_output_dir": "csrc",
+        "csrc_abs": "/afs/andrew.cmu.edu/usr15/ayli1/private/18847/18847_joebertli/baseline/csrc",
+        "archive_dir": "archive.1"
+    }
+}
