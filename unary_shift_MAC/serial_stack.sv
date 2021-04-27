@@ -10,6 +10,8 @@ module serial_stack #(
     input  logic push,
     input  logic pop,
 
+    input  logic clear,
+
     output logic out
 );
     
@@ -23,7 +25,7 @@ module serial_stack #(
             lifo_d = (lifo_q << 1) | in;
         end
 
-        else if(pop) begin
+        if(pop) begin
             lifo_d = lifo_q >> 1;
         end
     end
@@ -32,6 +34,10 @@ module serial_stack #(
 
     always_ff @(posedge clk, negedge reset_n) begin
         if(!reset_n) begin
+            lifo_q <= 'b0;
+        end
+
+        else if(clear) begin
             lifo_q <= 'b0;
         end
 

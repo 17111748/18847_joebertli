@@ -40,12 +40,10 @@ module unary_adder #(
     serial_stack #(U_BITS) lifo (
         .clk      (clk),
         .reset_n  (reset_n),
-
         .in       (b),
-
         .push     (lifo_push),
         .pop      (lifo_pop),
-
+        .clear    (1'b0),
         .out      (lifo_out)
     );
 

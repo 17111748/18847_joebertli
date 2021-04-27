@@ -20,6 +20,22 @@ module unary_shift_mult_tb ();
         .*
     );
 
+    logic [2 * BIN_BITS:0] out_counter;
+    logic clear_counter;
+    always_ff @(posedge clk, negedge reset_n) begin
+        if(!reset_n) begin
+            out_counter <= 'b0;
+        end
+
+        else if(clear_counter) begin
+            out_counter <= 'b0;
+        end
+
+        else if(out) begin
+            out_counter <= out_counter + 'b1;
+        end
+    end
+
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
@@ -39,26 +55,39 @@ module unary_shift_mult_tb ();
         t1 = b_bin;
         t2 = c_bin;
 
-        in_valid <= 1;
-        for(i = 0; i < U_BITS; i++) begin
-            a <= a_bin > 0;
-            b <= b_bin > 0;
-            c <= c_bin > 0;
-
+        while(a_bin > 0 || b_bin > 0 || c_bin > 0) begin
             if(a_bin > 0) begin
+                a <= 1'b1;
                 a_bin--;
             end
 
+            else begin
+                a <= 1'b0;
+            end
+
             if(b_bin > 0) begin
+                b <= 1'b1;
                 b_bin--;
             end
 
+            else begin
+                b <= 1'b0;
+            end
+
             if(c_bin > 0) begin
+                c <= 1'b1;
                 c_bin--;
+            end
+
+            else begin
+                c <= 1'b0;
             end
 
             @(posedge clk);
         end
+        a <= 1'b0;
+        b <= 1'b0;
+        c <= 1'b0;
 
         @(posedge clk);
         
@@ -72,34 +101,35 @@ module unary_shift_mult_tb ();
             logic [BIN_BITS - 1:0] b_in,
             logic [BIN_BITS - 1:0] c_in
     );
+        clear_counter <= 1'b1;
+        @(posedge clk);
+        clear_counter <= 1'b0;
+
         a_bin = a_in;
         b_bin = b_in;
         c_bin = c_in;
-        out_bin = 4'd0;
 
         send_input();
 
-        for(i = 0; i < 260; i++) begin
-            if(out) begin
-                out_bin++;
-            end
-
+        for(i = 0; i < 300; i++) begin
             @(posedge clk);
         end
 
-        if(out_bin != a_bin * b_bin + c_bin) begin
+        if(out_counter != a_bin * b_bin + c_bin) begin
             $display("Incorrect; a = %d, b = %d, c = %d, output = %d", 
-                        a_bin, b_bin, c_bin, out_bin);
+                        a_bin, b_bin, c_bin, out_counter);
             $fatal("Aborting");
         end
     endtask
 
     initial begin
-        in_valid = 1'b0;
-        a_bin    = 4'd0;
-        b_bin    = 4'd0;
-        c_bin    = 4'd0;
-        out_bin  = 4'd0;
+        a_bin   = 4'd0;
+        b_bin   = 4'd0;
+        c_bin   = 4'd0;
+        out_bin = 4'd0;
+        a       = 'b0;
+        b       = 'b0;
+        c       = 'b0;
 
         reset();
 
