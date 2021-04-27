@@ -36,7 +36,7 @@ module unary_shift_mac #(
         .out      (c_reg)
     );
 
-    unary_adder #(BIN_BITS) add (
+    unary_adder #(2 * BIN_BITS) add (
         .clk      (clk),
         .reset_n  (reset_n),
         .a        (add_a),
