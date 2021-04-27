@@ -24,7 +24,7 @@ module unary_shift_multiplier #(
     input  logic reset_n,
     input  logic in_a,
     input  logic in_b,
-    input  logic in_valid,
+//    input  logic in_valid,
 
     output logic out
 );
@@ -80,6 +80,21 @@ module unary_shift_multiplier #(
         READ,
         OUTPUT
     } state_c, state_q;
+
+    logic in_valid;
+    logic in_valid_q;
+
+    always_ff @(posedge clk, negedge reset_n) begin
+        if(!reset_n) begin
+            in_valid_q <= 'b0;
+        end
+
+        else begin
+            in_valid_q <= in_valid;
+        end
+    end
+
+    assign in_valid = (in_a | in_b) | (in_valid_q & ~empty_n);
 
     assign shift_a   = in_valid;
     assign shift_b   = in_valid | (~last_n & empty_n);
