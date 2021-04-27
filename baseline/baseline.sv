@@ -31,12 +31,12 @@ module Product_Block
     #(parameter WIDTH = 4)
     (input  logic             in_rdy, clk, reset_n,
      input  logic [WIDTH-1:0] w, x,
-     output logic             out);
+     output logic             done, out);
 
     logic [WIDTH-1:0] top_count;
     logic top_en, top_ld, top_done;
 
-    logic [WIDTH-1:0] bot_count, bot_init; // bot_init = x throughout counting
+    logic [WIDTH-1:0] bot_count;
     logic bot_en, bot_ld, bot_done, bot_recycle;
 
     enum logic [2:0] {INIT, COMP} curr_state, next_state;
@@ -45,7 +45,7 @@ module Product_Block
     Down_Counter #(WIDTH) top(.en(top_en), .load(top_ld), .recycle(1'b0),
                               .clk(clk), .D(w), .Q0(), .Q(top_count));
     Down_Counter #(WIDTH) bot(.en(bot_en), .load(bot_ld), .recycle(bot_recycle),
-                              .clk(clk), .D(x), .Q0(bot_init), .Q(bot_count));
+                              .clk(clk), .D(x), .Q0(), .Q(bot_count));
 
     assign top_done = (top_count == 4'd1);
     assign bot_done = (bot_count == 4'd0);
@@ -61,6 +61,7 @@ module Product_Block
         bot_en      = 1'b0;
         bot_ld      = 1'b0;
         bot_recycle = 1'b0;
+        done        = 1'b0;
         out         = 1'b0;
         case (curr_state)
             INIT: begin
@@ -80,8 +81,10 @@ module Product_Block
                 end
                 else if (bot_done) begin
                     // If top and bottom counter are done, finished
-                    if (top_done)
+                    if (top_done) begin
+                        done       = 1'b1;
                         next_state = INIT;
+                    end
                     // If only bottom counter is done, decrement top counter
                     // and start the next loop of the bottom counter
                     else begin

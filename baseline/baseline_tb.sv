@@ -1,14 +1,14 @@
 `default_nettype none
 
 module prod_block_tb();
-    logic clk, reset_n, in_rdy, out;
+    logic clk, reset_n, in_rdy, done, out;
     logic [3:0] w, x;
 
     Product_Block dut(.*);
 
     initial begin
         clk = 0;
-        forever #5 clk = ~clk;
+        forever #1 clk = ~clk;
     end
 
     task reset();
@@ -19,13 +19,34 @@ module prod_block_tb();
     endtask
 
     initial begin
-        $monitor($time,, " | w: %d | x: %d", clk, w, x);
+        $monitor($time,, "in_rdy: %b, clk: %d | w: %d | x: %d | done: %b, out: %d", in_rdy, clk, w, x, done, out);
         reset();
-           w = 4'd2;
-           x = 4'd1;
-        #1 w = 4'd3;
-           x = 4'd2;
-        #1 $finish;
+
+        in_rdy <= 1'd1;
+        w      <= 4'd2;
+        x      <= 4'd3;
+        @ (posedge clk);
+
+        in_rdy <= 1'd0;
+        @ (posedge clk);
+
+        #20 in_rdy <= 1'd1;
+        w <= 4'd3;
+        x <= 4'd5;
+        @ (posedge clk);
+        @ (posedge clk);
+
+        in_rdy <= 1'd0;
+        @ (posedge clk);
+        #50 $finish;
+
+        //    in_rdy = 1'd1;
+        //    w = 4'd1;
+        //    x = 4'd2;
+        //#10
+        //    w = 4'd4;
+        //    x = 4'd2;
+        //#20 $finish;
     end
 
 

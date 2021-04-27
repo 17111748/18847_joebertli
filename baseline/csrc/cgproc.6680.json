@@ -1,0 +1,40 @@
+{
+    "Modules": {
+        "...MASTER...": {},
+        "std": {},
+        "prod_block_tb": {
+            "Compiled": "Yes",
+            "Compiled Times": 10
+        }
+    },
+    "CompUnits": {
+        "amcQw_d": {
+            "mod": "...MASTER...",
+            "mode": 4,
+            "out": "objs/amcQw_d.o",
+            "bytes": 7287,
+            "checksum": 4294967295
+        },
+        "hkDta_d": {
+            "mod": "prod_block_tb",
+            "mode": 4,
+            "out": "hkDta_d.o",
+            "bytes": 20856,
+            "checksum": 4294967295,
+            "archive": "archive.44/_6680_archive_1.a"
+        }
+    },
+    "reusePaths": {},
+    "ObjArchives": [
+        {
+            "archive": "archive.44/_6680_archive_1.a",
+            "objects": [
+                [
+                    "hkDta_d.o",
+                    20856
+                ]
+            ],
+            "size": 20856
+        }
+    ]
+}

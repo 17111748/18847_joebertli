@@ -22,11 +22,12 @@
 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/bin/vcs1
 baseline.sv
 baseline_tb.sv
-47
+49
 sysc_uni_pwd=/afs/andrew.cmu.edu/usr15/ayli1/private/18847/18847_joebertli/baseline
-XDG_SESSION_ID=18374
+XDG_SESSION_ID=20023
 XDG_RUNTIME_DIR=/run/user/2645958
 XDG_DATA_DIRS=/afs/andrew.cmu.edu/usr15/ayli1/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+XCEL_PATH=/afs/ece.cmu.edu/support/cds/share/image/usr/cds/xcelium-19.03.010/tools.lnx86
 VMR_MODE_FLAG=32
 VCS_VERSION=vcs-mx_vK-2015.09
 VCS_TARGET_ARCH=amd64
@@ -43,8 +44,8 @@ TOOL_HOME=/afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/l
 SYNOPSYS_LICENSE=/afs/ece.cmu.edu/support/synopsys/license.dat
 SYNOPSYS_HOME=/afs/ece.cmu.edu/support/synopsys/synopsys.release
 SSH_TTY=/dev/pts/8
-SSH_CONNECTION=128.2.131.23 43898 128.2.131.23 22
-SSH_CLIENT=128.2.131.23 43898 22
+SSH_CONNECTION=128.2.13.138 52424 128.2.131.23 22
+SSH_CLIENT=128.2.13.138 52424 22
 SSH_ASKPASS=/usr/libexec/openssh/gnome-ssh-askpass
 SELINUX_USE_CURRENT_RANGE=
 SELINUX_ROLE_REQUESTED=
@@ -65,6 +66,7 @@ LC_ALL=C
 KRB5CCNAME=KEYRING:persistent:2645958
 KDEDIRS=/usr
 HISTCONTROL=ignoredups
+GENUS_PATH=/afs/ece.cmu.edu/support/cds/share/image/usr/cds/genus-18.14.000/tools.lnx86/
 DC_VERSION=syn-vJ-2014.09-SP4
 DC_HOME=/afs/ece.cmu.edu/support/synopsys/synopsys.release/syn-vJ-2014.09-SP4
 CVS_RSH=ssh
@@ -72,11 +74,11 @@ BASH_FUNC_module()=() {  eval `/usr/bin/modulecmd bash $*`_}
 AKLOG=/usr/bin/aklog
 0
 2
-1618808204 baseline_tb.sv
-1618808130 baseline.sv
+1619498220 baseline_tb.sv
+1619498189 baseline.sv
 4
 0 
 1440563255 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/lib/libvirsim.so
 1440562843 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/lib/liberrorinf.so
 1440562824 /afs/ece.cmu.edu/support/synopsys/synopsys.release/vcs-mx_vK-2015.09/linux64/lib/libsnpsmalloc.so
-1618808209 simv.daidir
+1619498225 simv.daidir

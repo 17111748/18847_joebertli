@@ -1,0 +1,90 @@
+xrun: 19.03-s010: (c) Copyright 1995-2019 Cadence Design Systems, Inc.
+TOOL:	xrun	19.03-s010: Started on Apr 26, 2021 at 23:19:38 EDT
+xrun
+	-f baseline.args
+		-clean
+		-nospecify
+		-timescale 1ns/1ps
+		-mess
+		-access +rwc
+		baseline.sv
+		baseline_tb.sv
+xrun: *N,CLEAN: Removing existing directory ./xcelium.d.
+file: baseline.sv
+    (input  logic en, load, recycle, clk,
+                   |
+xmvlog: *W,NODNTW (baseline.sv,9|19): Implicit net port (en) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    (input  logic en, load, recycle, clk,
+                         |
+xmvlog: *W,NODNTW (baseline.sv,9|25): Implicit net port (load) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    (input  logic en, load, recycle, clk,
+                                  |
+xmvlog: *W,NODNTW (baseline.sv,9|34): Implicit net port (recycle) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    (input  logic en, load, recycle, clk,
+                                       |
+xmvlog: *W,NODNTW (baseline.sv,9|39): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [WIDTH-1:0] D,
+                              |
+xmvlog: *W,NODNTW (baseline.sv,10|30): Implicit net port (D) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.Down_Counter:sv
+		errors: 0, warnings: 5
+    (input  logic             in_rdy, clk, reset_n,
+                                   |
+xmvlog: *W,NODNTW (baseline.sv,32|35): Implicit net port (in_rdy) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    (input  logic             in_rdy, clk, reset_n,
+                                        |
+xmvlog: *W,NODNTW (baseline.sv,32|40): Implicit net port (clk) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+    (input  logic             in_rdy, clk, reset_n,
+                                                 |
+xmvlog: *W,NODNTW (baseline.sv,32|49): Implicit net port (reset_n) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [WIDTH-1:0] w, x,
+                              |
+xmvlog: *W,NODNTW (baseline.sv,33|30): Implicit net port (w) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+     input  logic [WIDTH-1:0] w, x,
+                                 |
+xmvlog: *W,NODNTW (baseline.sv,33|33): Implicit net port (x) is not allowed since `default_nettype is declared as 'none'; 'wire' used instead [19.2(IEEE 2001)].
+	module worklib.Product_Block:sv
+		errors: 0, warnings: 5
+file: baseline_tb.sv
+	module worklib.prod_block_tb:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		prod_block_tb
+xmelab: *W,DSEMEL: This SystemVerilog design will be simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.Down_Counter:sv <0x3ece52b9>
+			streams:   4, words:  1454
+		worklib.Down_Counter:sv <0x42deed12>
+			streams:   4, words:  1268
+		worklib.Product_Block:sv <0x16fdeae1>
+			streams:  14, words:  5019
+		worklib.prod_block_tb:sv <0x6a3d6028>
+			streams:  11, words:  6560
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                 Instances  Unique
+		Modules:                 4       3
+		Registers:              23      21
+		Scalar wires:           13       -
+		Vectored wires:          8       -
+		Always blocks:           4       3
+		Initial blocks:          2       2
+		Cont. assignments:       2       2
+		Pseudo assignments:     15      15
+		Simulation timescale:  1ps
+	Writing initial simulation snapshot: worklib.prod_block_tb:sv
+Loading snapshot worklib.prod_block_tb:sv .................... Done
+xmsim: *W,DSEM2009: This SystemVerilog design is simulated as per IEEE 1800-2009 SystemVerilog simulation semantics. Use -disable_sem2009 option for turning off SV 2009 simulation semantics.
+xcelium> source /afs/ece.cmu.edu/support/cds/share/image/usr/cds/xcelium-19.03.010/tools/xcelium/files/xmsimrc
+xcelium> run
+                   0  | w:  x | x:  x | out: 0
+                   1  | w:  2 | x:  1 | out: 0
+                  11  | w:  3 | x:  2 | out: 0
+Simulation complete via $finish(1) at time 12 NS + 0
+./baseline_tb.sv:28         #1 $finish;
+xcelium> exit
+TOOL:	xrun	19.03-s010: Exiting on Apr 26, 2021 at 23:19:49 EDT  (total: 00:00:11)

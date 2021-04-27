@@ -1,0 +1,8 @@
+-clean
+-nospecify
+-timescale 1ns/1ps
+-mess
+-access +rwc
+
+baseline.sv
+baseline_tb.sv
