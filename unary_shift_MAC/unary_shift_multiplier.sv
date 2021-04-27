@@ -24,7 +24,6 @@ module unary_shift_multiplier #(
     input  logic reset_n,
     input  logic in_a,
     input  logic in_b,
-//    input  logic in_valid,
 
     output logic out
 );
