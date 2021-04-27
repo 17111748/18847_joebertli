@@ -17,7 +17,7 @@
  *                                as either of the inputs goes high.
  */
 module unary_adder #(
-    parameter U_BITS = 16
+    parameter BIN_BITS = 4
 )(
     input  logic clk,
     input  logic reset_n,
@@ -27,6 +27,8 @@ module unary_adder #(
 
     output logic out
 );
+
+    localparam U_BITS = 1 << (BIN_BITS + 1);
 
     logic lifo_push;
     logic lifo_pop;

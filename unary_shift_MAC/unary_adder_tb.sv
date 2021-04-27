@@ -5,7 +5,7 @@ module unary_adder_tb ();
     logic reset_n;
     logic a, b, out;
 
-    unary_adder #(16) dut (
+    unary_adder #(4) dut (
         .*
     );
 
