@@ -1,4 +1,5 @@
 `default_nettype none
+`timescale 1ns/10ps
 
 module Counter 
   #(parameter WIDTH = 4) 
@@ -12,20 +13,6 @@ module Counter
       Q <= Q + 1; 
 
 endmodule: Counter
-
-module Counter_Down
-  #(parameter WIDTH = 4) 
-  (input  logic en, load, clk, 
-   input  logic [WIDTH-1:0] D, 
-   output logic [WIDTH-1:0] Q);
-
-   always_ff @(posedge clk) 
-    if(load)
-      Q <= D; 
-    else if (en)
-      Q <= Q - 1; 
-
-endmodule: Counter_Down
 
 module FA 
   (input  logic A, 
@@ -56,6 +43,7 @@ module HA
     and G2 (Cout, A, B); 
 
 endmodule: HA
+
 module Parallel_Accum_3
     (input  logic [7:0] in,
      input  logic       clk,  
@@ -144,9 +132,53 @@ module Parallel_Accum_4
     
 endmodule: Parallel_Accum_4
 
+module adder_tree 
+    #(parameter NUM_ELEMENTS = 16,  //Should be same number as number of voters
+      parameter INDEX_W = $clog2(NUM_ELEMENTS + 1)) 
+    (input  logic [NUM_ELEMENTS-1:0] in,
+     output logic [INDEX_W-1:0] sum);
+
+    generate
+        if(NUM_ELEMENTS == 1) begin
+            assign sum = in[0];
+        end else if(NUM_ELEMENTS == 2) begin
+            assign sum = in[0] + in [1];
+        end else if(NUM_ELEMENTS == 3) begin
+            assign sum = in[0] + in [1] + in[2];
+        end else begin
+            localparam LEFT_SIZE = (NUM_ELEMENTS-1)/2; // subtract one for carry in
+            localparam LEFT_END_INDEX = LEFT_SIZE;
+            localparam LEFT_W = $clog2(LEFT_SIZE+1);
+
+            localparam RIGHT_SIZE = (NUM_ELEMENTS-1) - LEFT_SIZE;
+            localparam RIGHT_INDEX = LEFT_SIZE + 1;
+            localparam RIGHT_END_INDEX = NUM_ELEMENTS - 1;
+            localparam RIGHT_W = $clog2(RIGHT_SIZE+1);
+
+            logic [LEFT_W-1:0] left_temp;
+            logic [RIGHT_W-1:0] right_temp;
+
+            logic carry_in;
+            assign carry_in = in[0];
+            adder_tree #(LEFT_SIZE) lefty (
+                .in(in[LEFT_END_INDEX:1]),
+                .sum(left_temp)
+            );
+
+            adder_tree #(RIGHT_SIZE) righty (
+                .in(in[RIGHT_END_INDEX:RIGHT_INDEX]),
+                .sum(right_temp)
+            );
+
+            always_comb begin
+                sum = left_temp + right_temp + carry_in;
+            end
+        end
+    endgenerate
+endmodule
 
 // Performs out = a*b + c 
-module unary_binary_MAC
+module separate
     #(parameter SIZE = 4)
     (input  logic clk, 
      input  logic reset_n, 
@@ -154,19 +186,17 @@ module unary_binary_MAC
      input  logic [SIZE-1:0] a, 
      input  logic [SIZE-1:0] b, 
      input  logic [SIZE-1:0] c, 
+     input  logic [SIZE:0]   counter_out, 
      output logic ready, // Asserted when the output is ready to be read. 
-     output logic [(SIZE<<1)-1:0] out); 
+     output logic [(1<<SIZE)-1:0] unary_out); 
 
     logic [(1<<SIZE)-1:0] unary; // Includes the c at the MSB
-    logic [(1<<SIZE)-1:0] unary_out; // Includes the c at the MSB
 
     logic ready_flag; // Flag to reset the ready signal 
 
     logic [SIZE-1:0] a_reg; 
     logic [SIZE-1:0] b_reg; 
     logic [SIZE-1:0] c_reg; 
-
-    logic [SIZE:0] counter_out; 
 
     // Stores the original binary input into a register 
     always_ff@(posedge clk) 
@@ -177,7 +207,6 @@ module unary_binary_MAC
         end 
 
     // Turn binary input into unary input 
-    Counter #(SIZE+1) counter(.en(1'b1), .clear(valid), .clk(clk), .Q(counter_out)); 
     always_ff@(posedge clk, negedge reset_n) 
         if(~reset_n) begin 
             unary[(1<<SIZE)-1:0]     <= (1<<SIZE)'('b0); 
@@ -213,136 +242,70 @@ module unary_binary_MAC
 
     // Accumulator 
     assign unary_out[(1<<SIZE)-1] = unary[(1<<SIZE)-1]; // Propogate the c value 
+
+
+
+endmodule: separate
+
+
+// Performs out = a*b + c 
+module unary_binary_MAC
+    #(parameter SIZE = 6,
+      parameter SETS = 16)
+    (input  logic clk, 
+     input  logic reset_n, 
+     input  logic valid, // Start of when the input signal should be grabbed.
+     input  logic [(SETS*SIZE)-1:0] a, 
+     input  logic [(SETS*SIZE)-1:0] b, 
+     input  logic [(SETS*SIZE)-1:0] c, 
+     output logic ready, // Asserted when the output is ready to be read. 
+     output logic [(SIZE<<1)+SETS-1:0] out); 
+
+    logic [(1<<SIZE)*SETS-1:0] unary_out; // Includes the c at the MSB
+
+    logic ready_flag; // Flag to reset the ready signal 
+
+    logic [(SETS*SIZE)-1:0] a_reg; 
+    logic [(SETS*SIZE)-1:0] b_reg; 
+    logic [(SETS*SIZE)-1:0] c_reg; 
+
+    always_ff@(posedge clk) 
+        if(valid) begin 
+            a_reg <= a; 
+            b_reg <= b; 
+            c_reg <= c; 
+        end 
+
+    logic [SIZE:0] counter_out; 
+    logic [SETS-1:0] ready_out; 
+
+    // Turn binary input into unary input 
+    Counter #(SIZE+1) counter(.en(1'b1), .clear(valid), .clk(clk), .Q(counter_out)); 
+
+    genvar j; 
+    generate
+        for(j = 0; j < SETS; j++) 
+        begin : loop
+            separate #(SIZE) s(.clk(clk), .reset_n(reset_n), .valid(valid), 
+            .a(a[(j+1)*SIZE-1:j*SIZE]), .b(b[(j+1)*SIZE-1:j*SIZE]), .c(c[(j+1)*SIZE-1:j*SIZE]), 
+            .counter_out(counter_out), .ready(ready_out[j]), 
+            .unary_out(unary_out[((j+1)*(1<<SIZE))-1:j*(1<<SIZE)]));
+        end : loop 
+    endgenerate
     
-    Parallel_Accum_3 pa(.in(unary_out), .clk(clk), .reset_n(reset_n), .out(out)); 
+    logic [$clog2((1<<SIZE)*SETS+1)-1:0] at_out; 
+    adder_tree #(.NUM_ELEMENTS((1<<SIZE)*SETS)) at (.in(unary_out), .sum(at_out)); 
+
+    assign ready = (ready_out == ~((SETS)'('b0))); 
+
+    always_ff@(posedge clk, negedge reset_n) 
+        if(~reset_n)
+            out <= 0; 
+        else if(ready_out != 0)
+            out <= 0; 
+        else
+            out <= out + at_out; 
 
 
 endmodule: unary_binary_MAC
-
-
-// // Performs out = a*b + c 
-// module unary_binary_MAC
-//     #(parameter SIZE = 4)
-//     (input  logic clk, 
-//      input  logic reset_n, 
-//      input  logic valid, // Start of when the input signal should be grabbed.
-//      input  logic [SIZE-1:0] a, 
-//      input  logic [SIZE-1:0] b, 
-//      input  logic [SIZE-1:0] c, 
-//      output logic ready, // Asserted when the output is ready to be read. 
-//      output logic [(SIZE<<1)-1:0] out); 
-
-//     logic [(1<<SIZE)-1:0] unary; // Includes the c at the MSB
-//     logic [(1<<SIZE)-1:0] unary_out; // Includes the c at the MSB
-
-//     logic ready_flag; // Flag to reset the ready signal 
-
-//     logic [SIZE-1:0] a_reg; 
-//     logic [SIZE-1:0] b_reg; 
-//     logic [SIZE-1:0] c_reg; 
-
-//     logic [SIZE:0] counter_out; 
-
-//     // Stores the original binary input into a register 
-//     always_ff@(posedge clk) 
-//         if(valid) begin 
-//             a_reg <= a; 
-//             b_reg <= b; 
-//             c_reg <= c; 
-//         end 
-
-//     // Turn binary input into unary input 
-//     Counter #(SIZE+1) counter(.en(1'b1), .clear(valid), .clk(clk), .Q(counter_out)); 
-//     always_ff@(posedge clk, negedge reset_n) 
-//         if(~reset_n) begin 
-//             unary[(1<<SIZE)-1:0]     <= (1<<SIZE)'('b0); 
-//             ready                    <= 1'b0; 
-//             ready_flag               <= 1'b0; 
-//         end 
-//         else begin 
-//             ready                    <= 1'b0; 
-//             if(valid) 
-//                 temp_ready           <= 1'b0; 
-//             if(counter_out < a_reg) 
-//                 unary[(1<<SIZE)-2:0] <= ~(((1<<SIZE)-1)'('b0)); // Change this to arbitrary size 
-//             else 
-//                 unary[(1<<SIZE)-2:0] <= ((1<<SIZE)-1)'('b0); 
-//             if(counter_out < c_reg) 
-//                 unary[(1<<SIZE)-1]   <= 1'b1; 
-//             else 
-//                 unary[(1<<SIZE)-1]   <= 1'b0; 
-//             if(counter_out >= a_reg && counter_out >= c_reg && ready_flag == 1'b0) begin 
-//                 ready                <= 1'b1; 
-//                 ready_flag           <= 1'b1; 
-//             end 
-//         end 
-
-//     // Mask the Fanned Out unary inputs with the bits of a binary number 
-//     genvar i; 
-//     generate 
-//         for(i = 1; i < (1<<SIZE); i = i + 1)
-//         begin : loop 
-//             assign unary_out[i-1] = unary[i-1] & b_reg[$clog2(i+1)-1]; // Masking it with the second input
-//         end: loop 
-//     endgenerate    
-
-//     // Accumulator 
-//     assign unary_out[(1<<SIZE)-1] = unary[(1<<SIZE)-1]; // Propogate the c value 
-    
-//     always_ff@(posedge clk, negedge reset_n) 
-//         if(~reset_n)
-//             out <= 0; 
-//         else if(ready == 1'b1)
-//             out <= 0; 
-//         else
-//             out <= out + $countones(unary_out); 
-
-
-// endmodule: unary_binary_MAC
-
-
-
-// //###############################################################################################
-// // ANOTHER METHOD: It might be slightly faster 
-
-// // Stores the original binary input into a register 
-// always_ff@(posedge clk) 
-//     if(valid)
-//         b_reg <= b; 
-
-// logic zero_a, zero_c;  
-
-// logic [SIZE:0] counter_out_a; 
-// logic [SIZE:0] counter_out_c; 
-
-// // Turn binary input into unary input 
-// Counter_Down #(WIDTH=SIZE) counter(.en(zero_a), .load(valid), .clk(clk), .D(a), .Q(counter_out_a)); 
-// Counter_Down #(WIDTH=SIZE) counter(.en(zero_c), .load(valid), .clk(clk), .D(c), .Q(counter_out_a)); 
-// always_ff@(posedge clk, negedge reset_n) 
-//     if(~reset_n) begin 
-//         unary[(1<<SIZE)-1:0] <= 0; 
-//         zero_a <= 1'b1; 
-//         zero_c <= 1'b1; 
-//     end 
-//     else begin 
-//         if(valid) begin
-//             zero_a <= 1'b1; 
-//             zero_c <= 1'b1; 
-//         end 
-//         if((counter_out_a >= 0) && (counter_out_a[SIZE] != 1'b1)) begin 
-//             unary[(1<<SIZE)-2:0] <= 15'h7FFF; // Change this to arbitrary size 
-//         end 
-//         else begin
-//             unary[(1<<SIZE)-2:0] <= 15'b0; 
-//             zero_a <= 1'b0;
-//         end 
-//         if((counter_out_c >= 0) && (counter_out_c[SIZE] != 1'b1)) begin 
-//             unary[(1<<SIZE)-1] <= 1'b1; 
-//         end 
-//         else begin 
-//             unary[(1<<SIZE)-1] <= 1'b0; 
-//             zero_c <= 1'b0;
-//         end 
-//     end 
-// //###############################################################################################
 
