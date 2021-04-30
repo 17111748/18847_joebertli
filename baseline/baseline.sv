@@ -47,8 +47,8 @@ module Product_Block
     Down_Counter #(WIDTH) bot(.en(bot_en), .load(bot_ld), .recycle(bot_recycle),
                               .clk(clk), .D(x), .Q0(), .Q(bot_count));
 
-    assign top_done = (top_count == 4'd1);
-    assign bot_done = (bot_count == 4'd0);
+    assign top_done = (top_count == (WIDTH)'('d1));
+    assign bot_done = (bot_count == (WIDTH)'('d0));
 
     always_ff @(posedge clk, negedge reset_n)
     if (~reset_n) curr_state <= INIT;
@@ -254,8 +254,8 @@ module Top
     genvar i;
     generate
         for (i = 0; i < NUM_PRODS; i++) begin: prod_blocks
-            Product_Block p(.in_rdy(in_rdy[i]), .clk(clk), .reset_n(reset_n),
-                            .w(w[i]), .x(x[i]), .done(PB_done[i]), .out(PAC_in[i]));
+            Product_Block #(WIDTH) p(.in_rdy(in_rdy[i]), .clk(clk), .reset_n(reset_n),
+                                     .w(w[i]), .x(x[i]), .done(PB_done[i]), .out(PAC_in[i]));
         end
     endgenerate
 
