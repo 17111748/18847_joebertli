@@ -191,26 +191,77 @@ module Parallel_Accum_4
 
 endmodule: Parallel_Accum_4
 
-module Top
-    (input  logic             clk, reset_n,
-     input  logic [15:0]      in_rdy,
-     input  logic [15:0][3:0] w, x,
-     output logic             result_rdy,
-     output logic [ 7:0]      result);
+module adder_tree 
+    #(parameter NUM_ELEMENTS = 16,  //Should be same number as number of voters
+      parameter INDEX_W = $clog2(NUM_ELEMENTS + 1)) 
+    (input  logic [NUM_ELEMENTS-1:0] in,
+     output logic [INDEX_W-1:0] sum);
 
-    logic [15:0] PB_done;
-    logic [15:0] PAC_in;
+    generate
+        if(NUM_ELEMENTS == 1) begin
+            assign sum = in[0];
+        end else if(NUM_ELEMENTS == 2) begin
+            assign sum = in[0] + in [1];
+        end else if(NUM_ELEMENTS == 3) begin
+            assign sum = in[0] + in [1] + in[2];
+        end else begin
+            localparam LEFT_SIZE = (NUM_ELEMENTS-1)/2; // subtract one for carry in
+            localparam LEFT_END_INDEX = LEFT_SIZE;
+            localparam LEFT_W = $clog2(LEFT_SIZE+1);
+
+            localparam RIGHT_SIZE = (NUM_ELEMENTS-1) - LEFT_SIZE;
+            localparam RIGHT_INDEX = LEFT_SIZE + 1;
+            localparam RIGHT_END_INDEX = NUM_ELEMENTS - 1;
+            localparam RIGHT_W = $clog2(RIGHT_SIZE+1);
+
+            logic [LEFT_W-1:0] left_temp;
+            logic [RIGHT_W-1:0] right_temp;
+
+            logic carry_in;
+            assign carry_in = in[0];
+            adder_tree #(LEFT_SIZE) lefty (
+                .in(in[LEFT_END_INDEX:1]),
+                .sum(left_temp)
+            );
+
+            adder_tree #(RIGHT_SIZE) righty (
+                .in(in[RIGHT_END_INDEX:RIGHT_INDEX]),
+                .sum(right_temp)
+            );
+
+            always_comb begin
+                sum = left_temp + right_temp + carry_in;
+            end
+        end
+    endgenerate
+endmodule
+
+module Top
+    #(parameter WIDTH     = 4,
+      parameter TREE_W    = $clog2(NUM_PRODS + 1)
+      parameter NUM_PRODS = 16)
+    (input  logic                            clk, reset_n,
+     input  logic [NUM_PRODS-1:0]            in_rdy,
+     input  logic [NUM_PRODS-1:0][WIDTH-1:0] w, x,
+     output logic                            result_rdy,
+     output logic [TREE_W-1:0]               result);
+
+    logic [NUM_PRODS-1:0] PB_done;
+    logic [NUM_PRODS-1:0] PAC_in;
 
     assign result_rdy = |PB_done; // OR of all the PBs' done signals
 
     genvar i;
     generate
-        for (i = 0; i < 16; i++) begin: prod_blocks
+        for (i = 0; i < NUM_PRODS; i++) begin: prod_blocks
             Product_Block p(.in_rdy(in_rdy[i]), .clk(clk), .reset_n(reset_n),
                             .w(w[i]), .x(x[i]), .done(PB_done[i]), .out(PAC_in[i]));
         end
     endgenerate
 
-    Parallel_Accum_4 pac(.in(PAC_in), .clk(clk), .reset_n(reset_n), .out(result));
+    //Parallel_Accum_4 pac(.in(PAC_in), .clk(clk), .reset_n(reset_n), .out(result));
+    adder_tree #(.NUM_ELEMENTS(NUM_PRODS),
+                 .INDEX_W(TREE_W))
+               pac(.in(PAC_in), .out(result));
 
 endmodule: Top
