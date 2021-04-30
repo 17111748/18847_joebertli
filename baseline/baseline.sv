@@ -262,6 +262,6 @@ module Top
     //Parallel_Accum_4 pac(.in(PAC_in), .clk(clk), .reset_n(reset_n), .out(result));
     adder_tree #(.NUM_ELEMENTS(NUM_PRODS),
                  .INDEX_W(TREE_W))
-               pac(.in(PAC_in), .out(result));
+               pac(.in(PAC_in), .sum(result));
 
 endmodule: Top
