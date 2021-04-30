@@ -238,8 +238,8 @@ endmodule
 
 module Top
     #(parameter WIDTH     = 4,
-      parameter TREE_W    = $clog2(NUM_PRODS + 1)
-      parameter NUM_PRODS = 16)
+      parameter NUM_PRODS = 16,
+      parameter TREE_W    = $clog2(NUM_PRODS + 1))
     (input  logic                            clk, reset_n,
      input  logic [NUM_PRODS-1:0]            in_rdy,
      input  logic [NUM_PRODS-1:0][WIDTH-1:0] w, x,
