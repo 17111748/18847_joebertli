@@ -16,6 +16,7 @@
  *
  * Outputs:
  *   - out                        The product of in_a and in_b, as serial unary.
+ *   - zero                       Signals that the output is 0
  */
 module unary_shift_multiplier #(
     parameter BIN_BITS = 4
@@ -24,33 +25,35 @@ module unary_shift_multiplier #(
     input  logic reset_n,
     input  logic in_a,
     input  logic in_b,
-    input  logic in_valid,
 
-    output logic out
+    output logic out,
+    output logic zero
 );
 
     localparam U_BITS = 1 << BIN_BITS;
 
     logic [U_BITS - 1:0] unary_a;
-    logic                shift_a;
+    logic clear_out;
 
     sipo_shift #(U_BITS) shift_in_a (
         .clk      (clk),
         .reset_n  (reset_n),
         .in       (in_a),
-        .shift    (shift_a),
+        .shift    (in_a),
+        .clear    (clear_out),
         .out      (unary_a)
     );
 
-    logic load_b;
-    logic shift_b;
     logic empty_n;
 
-    siso_shift #(U_BITS) shift_in_b (
+    logic pop_b;
+    serial_stack #(U_BITS) shift_in_b (
         .clk      (clk),
         .reset_n  (reset_n),
-        .in       (in_b & load_b),
-        .shift    (shift_b),
+        .in       (in_b),
+        .push     (in_b),
+        .pop      (pop_b),
+        .clear    (clear_out),
         .out      (empty_n)
     );
 
@@ -63,16 +66,15 @@ module unary_shift_multiplier #(
     logic load_out;
     logic last_n;
     logic shift_out;
-    logic clear_out;
 
-    pipo_shift #(U_BITS, OUT_BITS) out_queue (
+    pipo_shift #(U_BITS, OUT_BITS, 0) out_queue (
         .clk      (clk),
         .reset_n  (reset_n),
         .in       (unary_a),
         .clear    (clear_out),
         .load_in  (load_out),
         .shift    (shift_out),
-        .out      ({last_n, out})
+        .out      ({out, last_n}) // flipped because left shift
     );
 
     localparam NUM_STATES = 2;
@@ -81,9 +83,10 @@ module unary_shift_multiplier #(
         OUTPUT
     } state_c, state_q;
 
-    assign shift_a   = in_valid;
-    assign shift_b   = in_valid | (~last_n & empty_n);
-    assign load_b    = in_valid;
+    logic in_valid;
+
+    assign in_valid = (in_a | in_b); 
+
     assign shift_out = ~load_out;
 
     always_comb begin
@@ -92,15 +95,18 @@ module unary_shift_multiplier #(
         load_out  = 'b0;
         clear_out = 'b0;
 
+        pop_b = 'b0;
+
         case(state_q)
             READ: begin
                 if(!in_valid && empty_n) begin
                     state_c = OUTPUT;
                 end
 
-                /* OR ~empty_n is to handle multiplying by 0 */
-                clear_out = in_valid | ~empty_n;
+                /* OR ~empty_n is to handle multiplying by b = 0 */
+                clear_out = !in_valid & !empty_n;
                 load_out  = !in_valid;
+                pop_b = !in_valid;
             end
 
             OUTPUT: begin
@@ -108,10 +114,21 @@ module unary_shift_multiplier #(
                     state_c = READ;
                 end
 
+                pop_b = !last_n;
                 clear_out = !last_n && !empty_n;
                 load_out  = !last_n && empty_n;
             end
         endcase
+    end
+
+    always_ff @(posedge in_a, posedge in_b, negedge reset_n) begin
+        if(!reset_n) begin
+            zero <= 'b0;
+        end
+
+        else begin
+            zero <= in_a ^ in_b;   
+        end
     end
 
     always_ff @(posedge clk, negedge reset_n) begin

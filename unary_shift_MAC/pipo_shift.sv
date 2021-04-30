@@ -35,6 +35,9 @@ module pipo_shift #(
                     out_c = {1'b0, out_q[N - 1:1]};
                 end
             end
+
+            assign out = out_q[OUT_BITS - 1:0];
+
         end
 
         else begin
@@ -53,6 +56,9 @@ module pipo_shift #(
                     out_c = {out_q[N - 2:0], 1'b0};
                 end
             end
+
+            assign out = out_q[N - 1:N - OUT_BITS];
+
         end
     endgenerate
 
@@ -66,6 +72,5 @@ module pipo_shift #(
         end
     end
     
-    assign out = out_q[OUT_BITS - 1:0];
 
 endmodule: pipo_shift

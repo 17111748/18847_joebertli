@@ -8,9 +8,8 @@ module unary_shift_mult_tb ();
     logic reset_n;
     logic in_a;
     logic in_b;
-    logic in_valid;
     logic out;
-    logic out_valid;
+    logic zero;
 
     logic [BIN_BITS - 1:0] a_bin;
     logic [BIN_BITS - 1:0] b_bin;
@@ -38,30 +37,35 @@ module unary_shift_mult_tb ();
         t0 = a_bin;
         t1 = b_bin;
 
-        in_valid <= 1;
-        for(i = 0; i < U_BITS; i++) begin
-            in_a <= a_bin > 0;
-            in_b <= b_bin > 0;
-
-            if(a_bin > 0) begin
-                a_bin--;
-            end
-
-            if(b_bin > 0) begin
-                b_bin--;
-            end
-
+        while(a_bin > 0 && b_bin > 0) begin
+            a_bin--;
+            b_bin--;
+            in_a <= 1'b1;
+            in_b <= 1'b1;
             @(posedge clk);
-
-            if(i == U_BITS - 1) begin
-                in_valid <= 1'b0;
-            end
         end
 
-        @(posedge clk);
+        while(a_bin > 0) begin
+            a_bin--;
+            in_a <= 1'b1;
+            in_b <= 1'b0;
+            @(posedge clk);
+        end
+
+        while(b_bin > 0) begin
+            b_bin--;
+            in_a <= 1'b0;
+            in_b <= 1'b1;
+            @(posedge clk);
+        end
+
+        in_a <= 1'b0;
+        in_b <= 1'b0;
         
         a_bin = t0;
         b_bin = t1;
+
+        @(posedge clk);
     endtask
 
     task test_case(
@@ -71,6 +75,7 @@ module unary_shift_mult_tb ();
         a_bin = a;
         b_bin = b;
         out_bin = 4'd0;
+        @(posedge clk);
 
         send_input();
 
@@ -90,16 +95,19 @@ module unary_shift_mult_tb ();
     endtask
 
     initial begin
-        in_valid = 1'b0;
         a_bin    = 4'd0;
         b_bin    = 4'd0;
         out_bin  = 4'd0;
+
+        in_a = 'b0;
+        in_b = 'b0;
 
         reset();
 
         test_case(3, 2);
         test_case(4, 15);
         test_case(3, 0);
+        test_case(5, 4);
         test_case(0, 5);
         test_case(15, 15);
         test_case(10, 9);

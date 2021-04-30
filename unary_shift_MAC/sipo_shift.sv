@@ -10,6 +10,7 @@ module sipo_shift #(
 
     input  logic                  in,
     input  logic                  shift,
+    input  logic                  clear,
     output logic [OUT_BITS - 1:0] out
 );
 
@@ -28,6 +29,10 @@ module sipo_shift #(
 
     always_ff @(posedge clk, negedge reset_n) begin
         if(!reset_n) begin
+            out_q <= 'b0;
+        end
+
+        else if(clear) begin
             out_q <= 'b0;
         end
 
