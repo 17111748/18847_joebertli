@@ -1,16 +1,16 @@
 `default_nettype none 
 `timescale 1ns/10ps
 
-module unary_binary_tb(); 
+module serial_tb(); 
     localparam SIZE_PARAM = 4;
-    localparam SET_PARAM = 2; 
+    localparam SET_PARAM = 1; 
 
     logic clk, reset_n, valid, ready;
     logic [(SET_PARAM*SIZE_PARAM)-1:0] a; 
     logic [(SET_PARAM*SIZE_PARAM)-1:0] b; 
     logic [(SIZE_PARAM<<1)+SET_PARAM-1:0] out; 
   
-    unary_binary_MAC #(.SIZE(SIZE_PARAM), .SETS(SET_PARAM)) dut(.clk(clk), .reset_n(reset_n), .valid(valid), 
+    serial #(.SIZE(SIZE_PARAM), .SETS(SET_PARAM)) dut(.clk(clk), .reset_n(reset_n), .valid(valid), 
                         .a(a), .b(b), .ready(ready), .out(out));
 
     logic [(SIZE_PARAM<<1)+SET_PARAM-1:0] out_correct; 
@@ -29,10 +29,10 @@ module unary_binary_tb();
         reset_n <= 1'b1; 
     endtask 
 
-    initial begin 
-        $monitor($time,, "a_reg = %b, b_reg = %b, counter_out = %d, ready_out = %b, ready = %b, out = %d, at_out = %d, valid = %b,",
-             dut.a_reg, dut.b_reg, dut.counter_out, dut.ready_out, ready, out, dut.at_out, valid); 
-    end 
+    // initial begin 
+    //     $monitor($time,, "a_reg = %b, b_reg = %b, counter_out = %d, unary_out = %b, ready = %b, out = %d, at_out = %d",
+    //          dut.a_reg, dut.b_reg, dut.counter_out, dut.unary_out, ready, out, dut.at_out); 
+    // end 
 
     int i, j; 
     int temp, temp1; 
@@ -71,32 +71,33 @@ module unary_binary_tb();
     endtask 
     
     initial begin 
-        // $dumpfile("unary_binary.vcd"); // Change this name as required
-        // $dumpvars(0, unary_binary_tb);
+        $dumpfile("serial.vcd"); // Change this name as required
+        $dumpvars(0, serial_tb);
 
         reset(); 
         $display("\n\nStart Testing.\n"); 
 
-        test_case((SIZE_PARAM*SET_PARAM)'('h11), 
-                  (SIZE_PARAM*SET_PARAM)'('h11), 
+        test_case((SIZE_PARAM*SET_PARAM)'('h1), 
+                  (SIZE_PARAM*SET_PARAM)'('h2), 
                   ((SIZE_PARAM<<1)+SET_PARAM)'('d2)); 
 
-        test_case((SIZE_PARAM*SET_PARAM)'('h21), 
-                  (SIZE_PARAM*SET_PARAM)'('h13), 
-                  ((SIZE_PARAM<<1)+SET_PARAM)'('d5)); 
+        // test_case((SIZE_PARAM*SET_PARAM)'('h88), 
+        //           (SIZE_PARAM*SET_PARAM)'('h88), 
+        //           ((SIZE_PARAM<<1)+SET_PARAM)'('d128)); 
 
-        // test_case((SIZE_PARAM*SET_PARAM)'('h00000000), 
-        //           (SIZE_PARAM*SET_PARAM)'('h00000000), 
-        //           ((SIZE_PARAM<<1)+SET_PARAM)'('d0)); 
+        // test_case((SIZE_PARAM*SET_PARAM)'('h11), 
+        //           (SIZE_PARAM*SET_PARAM)'('h11), 
+        //           ((SIZE_PARAM<<1)+SET_PARAM)'('d2)); 
 
         // test_case((SIZE_PARAM*SET_PARAM)'('h88888888), 
         //           (SIZE_PARAM*SET_PARAM)'('h88888888), 
         //           ((SIZE_PARAM<<1)+SET_PARAM)'('d512)); 
-        
+
         // test_case((SIZE_PARAM*SET_PARAM)'('hffffffff), 
         //           (SIZE_PARAM*SET_PARAM)'('hffffffff), 
         //           ((SIZE_PARAM<<1)+SET_PARAM)'('d1800));
         
+
         // test_case((SIZE_PARAM*SET_PARAM)'('h22221111), 
         //           (SIZE_PARAM*SET_PARAM)'('h75757575), 
         //           ((SIZE_PARAM<<1)+SET_PARAM)'('d72));
@@ -113,4 +114,4 @@ module unary_binary_tb();
     //     $sdf_annotate("../../synth/unary_binary_outputs/unary_binary_MAC_m.sdf", unary_binary_MAC); 
     // end 
 
-endmodule: unary_binary_tb 
+endmodule: serial_tb 
