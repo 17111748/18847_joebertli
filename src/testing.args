@@ -1,0 +1,13 @@
+-clean
+-nospecify
+-timescale 1ns/1ps
+-mess
+-access +rwc
+
+../synth/testing_outputs/unary_binary_MAC_m.v 
+../rtl/unary_binary/unary_binary_tb.sv 
+../rtl/Verilog/asap7sc7p5t_AO_RVT_TT_08182018.v 
+../rtl/Verilog/asap7sc7p5t_INVBUF_RVT_TT_08302018.v 
+../rtl/Verilog/asap7sc7p5t_OA_RVT_TT_08302018.v 
+../rtl/Verilog/asap7sc7p5t_SEQ_RVT_TT_08302018.v 
+../rtl/Verilog/asap7sc7p5t_SIMPLE_RVT_TT_08302018.v
